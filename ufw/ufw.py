@@ -7,10 +7,38 @@ from types import FunctionType
 UBUNTU_LOG_PATH = '/var/log/'
 UFW_LOG_PATTERN = '^ufw.*'
 
+
+class LogAttribute:
+
+    attribute = None
+
+    @classmethod
+    def __eq__(cls, value):
+        return lambda event: getattr(event, cls.attribute) == value
+
+    @classmethod
+    def __lt__(cls, value):
+        return lambda event: getattr(event, cls.attribute) < value
+
+    @classmethod
+    def __gt__(cls, value):
+        return lambda event: getattr(event, cls.attribute) > value
+
+    @classmethod
+    def __le__(cls, value):
+        return lambda event: getattr(event, cls.attribute) <= value
+
+    @classmethod
+    def __ge__(cls, value):
+        return lambda event: getattr(event, cls.attribute) >= value
+
+
 class UFWLogEntry:
     """Class for working with a single entry in a ufw log"""
+
     def __init__(self, event_datetime: datetime, hostname: str, uptime: float,
-                 event, IN=None, OUT=None, MAC=None, SRC=None, DST=None, TC=None,
+                 event, IN=None, OUT=None, MAC=None, SRC=None, DST=None,
+                 TC=None,
                  LEN=None, TOS=None, PERC=None, TTL=None, ID=None, PROTO=None,
                  SPT=None, DPT=None, WINDOW=None, RES=None, SYN_URGP=None,
                  ACK=False, PSH=False, *args, **kwargs):
@@ -69,6 +97,7 @@ class UFWLogFile:
     """Class for working with ufw log files. Provides support for using as
     an iterable, context manager, and ability to mix indexes, slices, and
     functions to get log entries"""
+
     def __init__(self, filename):
         self.log_events = list()
         self.filename = filename
