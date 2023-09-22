@@ -8,40 +8,14 @@ UBUNTU_LOG_PATH = '/var/log/'
 UFW_LOG_PATTERN = '^ufw.*'
 
 
-class LogAttribute:
-
-    attribute = None
-
-    @classmethod
-    def __eq__(cls, value):
-        return lambda event: getattr(event, cls.attribute) == value
-
-    @classmethod
-    def __lt__(cls, value):
-        return lambda event: getattr(event, cls.attribute) < value
-
-    @classmethod
-    def __gt__(cls, value):
-        return lambda event: getattr(event, cls.attribute) > value
-
-    @classmethod
-    def __le__(cls, value):
-        return lambda event: getattr(event, cls.attribute) <= value
-
-    @classmethod
-    def __ge__(cls, value):
-        return lambda event: getattr(event, cls.attribute) >= value
-
-
 class UFWLogEntry:
     """Class for working with a single entry in a ufw log"""
 
     def __init__(self, event_datetime: datetime, hostname: str, uptime: float,
                  event, IN=None, OUT=None, MAC=None, SRC=None, DST=None,
-                 TC=None,
-                 LEN=None, TOS=None, PERC=None, TTL=None, ID=None, PROTO=None,
-                 SPT=None, DPT=None, WINDOW=None, RES=None, SYN_URGP=None,
-                 ACK=False, PSH=False, *args, **kwargs):
+                 TC=None, LEN=None, TOS=None, PERC=None, TTL=None, ID=None,
+                 PROTO=None, SPT=None, DPT=None, WINDOW=None, RES=None,
+                 SYN_URGP=None, ACK=False, PSH=False, *args, **kwargs):
         self.event_datetime = event_datetime
         self.hostname = hostname
         self.uptime = uptime
@@ -58,8 +32,8 @@ class UFWLogEntry:
         self.TTL = TTL
         self.ID = ID
         self.PROTO = PROTO
-        self.SPT = SPT
-        self.DPT = DPT
+        self.SPT = SPT if not isinstance(SPT, str) else int(SPT)
+        self.DPT = DPT if not isinstance(DPT, str) else int(DPT)
         self.WINDOW = WINDOW
         self.RES = RES
         self.SYN_URGP = SYN_URGP
