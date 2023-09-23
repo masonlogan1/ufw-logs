@@ -1,7 +1,59 @@
-from types import FunctionType
 from unittest import TestCase, main
 from unittest.mock import MagicMock
 from ufw import filter_tools
+
+
+class FilterFunctionTests(TestCase):
+    """
+    Tests for ensuring the FilterFunction class is capable of wrapping a
+    function and combining with other FilterFunctions to create complex
+    logical combinations
+    """
+    def test_executes_provided_function_on_value(self):
+        """Tests that FilterFunction objects will execute the function provided
+        to them when they are called like functions"""
+        filter_func = filter_tools.FilterFunction(lambda val: val + 5)
+        self.assertEqual(filter_func(5), 10)
+
+    def test_can_combine_two_booleans_with_ampersand_operator(self):
+        """Tests that when a FilterFunction has the "&" operator used between
+        it and another boolean statement, both functions will be executed and
+        the "and" result of both will be returned"""
+        # function will evaluate if a provided value is GREATER THAN OR EQUALS 5
+        filter_func5 = filter_tools.FilterFunction(lambda val: val >= 5)
+        # function will evaluate if a provided value is LESS THAN 10
+        filter_func10 = filter_tools.FilterFunction(lambda val: val < 10)
+
+        # combination function will evaluate if a value is greater than 5 and
+        # less than 10
+        combo_func = filter_func5 & filter_func10
+
+        # accepted range: [5, 7)
+        self.assertFalse(combo_func(3))
+        self.assertTrue(combo_func(5))
+        self.assertTrue(combo_func(7))
+        self.assertFalse(combo_func(10))
+        self.assertFalse(combo_func(12))
+
+    def test_can_combine_two_booleans_with_or_operator(self):
+        """Tests that when a FilterFunction has the "|" operator used between
+        it and antoher boolean statement, both functions will be executed
+        and the "or" result of both will be returned"""
+        # function will evaluate if a provided value is LESS THAN OR EQUAL TO 5
+        filter_func5 = filter_tools.FilterFunction(lambda val: val <= 5)
+        # function will evaluate if a provided value is GREATER than 10
+        filter_func10 = filter_tools.FilterFunction(lambda val: val > 10)
+
+        # combination function will evaluate if a value is greater than 5 and
+        # less than 10
+        combo_func = filter_func5 | filter_func10
+
+        # accepted range: (-inf, 5](10, inf)
+        self.assertTrue(combo_func(3))
+        self.assertTrue(combo_func(5))
+        self.assertFalse(combo_func(7))
+        self.assertFalse(combo_func(10))
+        self.assertTrue(combo_func(12))
 
 
 class LogFilterTests(TestCase):
@@ -37,7 +89,6 @@ class LogFilterTests(TestCase):
 
         filter_function = str_filter == 'string'
 
-        self.assertIsInstance(filter_function, FunctionType)
         self.assertTrue(filter_function(equal_object))
         self.assertFalse(filter_function(unequal_object))
 
@@ -56,7 +107,6 @@ class LogFilterTests(TestCase):
         # value to see if it is also equal to 'string')
         filter_function = str_filter != 'string'
 
-        self.assertIsInstance(filter_function, FunctionType)
         self.assertTrue(filter_function(unequal_object))
         self.assertFalse(filter_function(equal_object))
 
@@ -72,7 +122,6 @@ class LogFilterTests(TestCase):
         # 5 < 7 < 10
         filter_function = int_filter > 7
 
-        self.assertIsInstance(filter_function, FunctionType)
         self.assertTrue(filter_function(smaller_object))
         self.assertFalse(filter_function(larger_object))
 
@@ -88,7 +137,6 @@ class LogFilterTests(TestCase):
         # 5 < 7 < 10
         filter_function = int_filter < 7
 
-        self.assertIsInstance(filter_function, FunctionType)
         self.assertTrue(filter_function(correct_object))
         self.assertFalse(filter_function(incorrect_object))
 
@@ -105,7 +153,6 @@ class LogFilterTests(TestCase):
         # 5 < 7 = 7 < 10
         filter_function = int_filter >= 7
 
-        self.assertIsInstance(filter_function, FunctionType)
         self.assertTrue(filter_function(smaller_object))
         self.assertTrue(filter_function(equal_object))
         self.assertFalse(filter_function(larger_object))
@@ -123,7 +170,6 @@ class LogFilterTests(TestCase):
         # 5 < 7 = 7 < 10
         filter_function = int_filter <= 7
 
-        self.assertIsInstance(filter_function, FunctionType)
         self.assertTrue(filter_function(larger_object))
         self.assertTrue(filter_function(equal_object))
         self.assertFalse(filter_function(smaller_object))

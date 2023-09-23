@@ -1,8 +1,7 @@
 import os
 import re
-from collections.abc import Iterable
+from collections.abc import Iterable, Callable
 from datetime import datetime
-from types import FunctionType
 
 UBUNTU_LOG_PATH = '/var/log/'
 UFW_LOG_PATTERN = '^ufw.*'
@@ -95,9 +94,10 @@ class UFWLogFile:
                 out += [self.log_events[index]]
             if isinstance(index, slice):
                 out += self.log_events[index]
-            if isinstance(index, FunctionType):
+            if isinstance(index, Callable):
                 out += self.search([index])
-            if isinstance(index, list) and all([isinstance(item, FunctionType)
+            if isinstance(index, list) and all([isinstance(item, Callable)
+                                                or isinstance(item, Callable)
                                                 for item in index]):
                 out += self.search(index)
         return out
