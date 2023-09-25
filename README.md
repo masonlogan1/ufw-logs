@@ -8,11 +8,11 @@ To Do List:
 - [x] ability to turn each line of the ufw log into an object with all known
 attributes for a single entry
 - [ ] ability to serialize ufw log entry into json format
-- [ ] ability to use something like `UFWLogFile(<filename>)[DPT=='25565']` to
+- [x] ability to use something like `UFWLogFile(<filename>)[DPT=='25565']` to
 get everything where DPT == 25565, where DPT is an object imported from
 ufw
-- [ ] ability to chain searches together using `&`, `^`, and `|` operators
-- [ ] ability to search using `^` and `!^` operators for similarity/dissimilarity
+- [x] ability to chain searches together using `&`, `^`, and `|` operators
+- [ ] ability to search using `%` and `!%` operators for similarity/dissimilarity
 - [ ] ability to search using `in` and `not in` operators to check that an
 attribute is not in a collection
 

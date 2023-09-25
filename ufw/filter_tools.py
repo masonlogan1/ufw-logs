@@ -52,22 +52,22 @@ class LogFilter:
         # if self.attr is None, we evaluate objects exactly as they are
         return event if self.attr is None else getattr(event, self.attr)
 
-    def __eq__(self, value) -> Callable[[Any], bool]:
+    def __eq__(self, value) -> FilterFunction:
         return FilterFunction(lambda event: self.__extract(event) == value)
 
-    def __ne__(self, value) -> Callable[[Any], bool]:
+    def __ne__(self, value) -> FilterFunction:
         return FilterFunction(lambda event: self.__extract(event) != value)
 
-    def __lt__(self, value) -> Callable[[Any], bool]:
+    def __lt__(self, value) -> FilterFunction:
         return FilterFunction(lambda event: self.__extract(event) > value)
 
-    def __gt__(self, value) -> Callable[[Any], bool]:
+    def __gt__(self, value) -> FilterFunction:
         return FilterFunction(lambda event: self.__extract(event) < value)
 
-    def __le__(self, value) -> Callable[[Any], bool]:
+    def __le__(self, value) -> FilterFunction:
         return FilterFunction(lambda event: self.__extract(event) >= value)
 
-    def __ge__(self, value) -> Callable[[Any], bool]:
+    def __ge__(self, value) -> FilterFunction:
         return FilterFunction(lambda event: self.__extract(event) <= value)
 
     def __setattr__(self, name, value):

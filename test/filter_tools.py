@@ -174,6 +174,40 @@ class LogFilterTests(TestCase):
         self.assertTrue(filter_function(equal_object))
         self.assertFalse(filter_function(smaller_object))
 
+    def test_combine_filters_with_ampersand(self):
+        """Tests that a log filter's return functions can be combined with an
+        ampersand operator to create a function that returns the "and" value
+        of both"""
+        int_filter = filter_tools.LogFilter('attr')
+
+        smaller_object = MagicMock(attr=5)
+        equal_object = MagicMock(attr=7)
+        larger_object = MagicMock(attr=10)
+
+        # 5 < 7 < 10
+        filter_function = (int_filter < 5) & (int_filter > 10)
+
+        self.assertFalse(filter_function(larger_object))
+        self.assertTrue(filter_function(equal_object))
+        self.assertFalse(filter_function(smaller_object))
+
+    def test_combine_filters_with_pipe(self):
+        """Tests that a log filter's return functions can be combined with a
+        pipe operator to create a function that returns the "or" value
+        of both"""
+        int_filter = filter_tools.LogFilter('attr')
+
+        smaller_object = MagicMock(attr=5)
+        equal_object = MagicMock(attr=7)
+        larger_object = MagicMock(attr=10)
+
+        # 5 < 6, 9 < 10
+        filter_function = (int_filter > 6) | (int_filter < 9)
+
+        self.assertTrue(filter_function(larger_object))
+        self.assertFalse(filter_function(equal_object))
+        self.assertTrue(filter_function(smaller_object))
+
 
 class PresetFiltersTests(TestCase):
     def test_all_filters_are_correct_type(self):
