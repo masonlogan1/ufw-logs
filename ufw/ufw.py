@@ -1,19 +1,20 @@
 import os
 import re
-from collections.abc import Iterable
+from collections.abc import Iterable, Callable
 from datetime import datetime
-from types import FunctionType
 
 UBUNTU_LOG_PATH = '/var/log/'
 UFW_LOG_PATTERN = '^ufw.*'
 
+
 class UFWLogEntry:
     """Class for working with a single entry in a ufw log"""
+
     def __init__(self, event_datetime: datetime, hostname: str, uptime: float,
-                 event, IN=None, OUT=None, MAC=None, SRC=None, DST=None, TC=None,
-                 LEN=None, TOS=None, PERC=None, TTL=None, ID=None, PROTO=None,
-                 SPT=None, DPT=None, WINDOW=None, RES=None, SYN_URGP=None,
-                 ACK=False, PSH=False, *args, **kwargs):
+                 event, IN=None, OUT=None, MAC=None, SRC=None, DST=None,
+                 TC=None, LEN=None, TOS=None, PERC=None, TTL=None, ID=None,
+                 PROTO=None, SPT=None, DPT=None, WINDOW=None, RES=None,
+                 SYN_URGP=None, ACK=False, PSH=False, *args, **kwargs):
         self.event_datetime = event_datetime
         self.hostname = hostname
         self.uptime = uptime
@@ -30,8 +31,8 @@ class UFWLogEntry:
         self.TTL = TTL
         self.ID = ID
         self.PROTO = PROTO
-        self.SPT = SPT
-        self.DPT = DPT
+        self.SPT = SPT if not isinstance(SPT, str) else int(SPT)
+        self.DPT = DPT if not isinstance(DPT, str) else int(DPT)
         self.WINDOW = WINDOW
         self.RES = RES
         self.SYN_URGP = SYN_URGP
@@ -69,6 +70,7 @@ class UFWLogFile:
     """Class for working with ufw log files. Provides support for using as
     an iterable, context manager, and ability to mix indexes, slices, and
     functions to get log entries"""
+
     def __init__(self, filename):
         self.log_events = list()
         self.filename = filename
@@ -92,9 +94,10 @@ class UFWLogFile:
                 out += [self.log_events[index]]
             if isinstance(index, slice):
                 out += self.log_events[index]
-            if isinstance(index, FunctionType):
+            if isinstance(index, Callable):
                 out += self.search([index])
-            if isinstance(index, list) and all([isinstance(item, FunctionType)
+            if isinstance(index, list) and all([isinstance(item, Callable)
+                                                or isinstance(item, Callable)
                                                 for item in index]):
                 out += self.search(index)
         return out
