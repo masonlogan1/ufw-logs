@@ -1,10 +1,51 @@
+import json
 import os
 import re
 from collections.abc import Iterable, Callable
 from datetime import datetime
 
 UBUNTU_LOG_PATH = '/var/log/'
+UBUNTU_DEFAULT_PATH = '/var/log/ufw.log'
 UFW_LOG_PATTERN = '^ufw.*'
+
+
+class UFWLogFileJSONEncoder(json.JSONEncoder):
+    """JSON Encoder that extracts data from a UFWLogFile object into
+    JSON format"""
+    def get_UFWLogEntry_json(self, ufw_entry) -> dict:
+        """Extracts values from a UFWLogEntry object into a dict,
+        excluding any key-value pairs where the value is None"""
+        data = {
+            'event_datetime': ufw_entry.event_datetime.strftime(
+                '%Y-%m-%d %H:%M:%S.%f'),
+            'hostname': ufw_entry.hostname,
+            'uptime': ufw_entry.uptime,
+            'event': ufw_entry.event,
+            'IN': ufw_entry.IN,
+            'OUT': ufw_entry.OUT,
+            'MAC': ufw_entry.MAC,
+            'SRC': ufw_entry.SRC,
+            'DST': ufw_entry.DST,
+            'LEN': ufw_entry.LEN,
+            'TC': ufw_entry.TC,
+            'TOS': ufw_entry.TOS,
+            'PERC': ufw_entry.PERC,
+            'TTL': ufw_entry.TTL,
+            'ID': ufw_entry.ID,
+            'PROTO': ufw_entry.PROTO,
+            'SPT': ufw_entry.SPT,
+            'DPT': ufw_entry.DPT,
+            'WINDOW': ufw_entry.WINDOW,
+            'RES': ufw_entry.RES,
+            'SYN_URGP': ufw_entry.SYN_URGP,
+            'ACK': ufw_entry.ACK,
+            'PSH': ufw_entry.PSH,
+        }
+        return {key: value for key, value in data.items() if value is not None}
+
+    def default(self, ufw_file_obj):
+        return [self.get_UFWLogEntry_json(entry)
+                for entry in ufw_file_obj.log_events]
 
 
 class UFWLogEntry:
@@ -39,9 +80,6 @@ class UFWLogEntry:
         self.ACK = ACK
         self.PSH = PSH
 
-    def to_json(self):
-        return self.__dict__
-
     @staticmethod
     def from_str(data):
         # UFW pads the uptime timestamp with whitespace, so we have to
@@ -71,7 +109,7 @@ class UFWLogFile:
     an iterable, context manager, and ability to mix indexes, slices, and
     functions to get log entries"""
 
-    def __init__(self, filename):
+    def __init__(self, filename=UBUNTU_DEFAULT_PATH):
         self.log_events = list()
         self.filename = filename
         with open(filename, 'r') as reader:
@@ -85,6 +123,10 @@ class UFWLogFile:
     def search(self, search_fns: iter = ()):
         return [event for event in self.log_events
                 if all(fn(event) for fn in search_fns)]
+
+    def serialize_to_file(self, filename):
+        with open(filename, 'w') as writer:
+            json.dump(self, writer, cls=UFWLogFileJSONEncoder)
 
     def __getitem__(self, indexes):
         out = list()
