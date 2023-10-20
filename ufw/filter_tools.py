@@ -7,12 +7,11 @@ COMMITTER:  Mason Logan <ufw@masonlogan.com>
 Provides a set of constants that can be used as a way of filtering a
 UFWLogFile object
 """
-from collections.abc import Callable as abcCallable
-from types import FunctionType
-from typing import Callable, Any, Union
+import re
+from collections.abc import Callable
 
 
-class FilterFunction(abcCallable):
+class FilterFunction(Callable):
     """
     Wrapper for functions returned by LogFilter that allows for logical
     combination of functions
@@ -70,6 +69,10 @@ class LogFilter:
     def __ge__(self, value) -> FilterFunction:
         return FilterFunction(lambda event: self.__extract(event) <= value)
 
+    def __mod__(self, value) -> FilterFunction:
+        return FilterFunction(lambda event:
+                              any(re.findall(value, self.__extract(event))))
+
     def __setattr__(self, name, value):
         # object should not be able to change after created
         if getattr(self, 'attr', False):
@@ -77,6 +80,11 @@ class LogFilter:
         self.__dict__[name] = value
 
 
+# PRESET FUNCTIONS FOR CONVENIENCE
+# These serve as a set of importable functions that match all attributes
+# of a UFWLogEntry object. This allows users to do something like:
+# >>> from ufw import EVENT_DATETIME
+# and start filtering log objects by their event_datetime attribute
 EVENT_DATETIME = LogFilter("event_datetime")
 HOSTNAME = LogFilter("hostname")
 UPTIME = LogFilter("uptime")

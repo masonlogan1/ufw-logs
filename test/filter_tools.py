@@ -37,7 +37,7 @@ class FilterFunctionTests(TestCase):
 
     def test_can_combine_two_booleans_with_or_operator(self):
         """Tests that when a FilterFunction has the "|" operator used between
-        it and antoher boolean statement, both functions will be executed
+        it and another boolean statement, both functions will be executed
         and the "or" result of both will be returned"""
         # function will evaluate if a provided value is LESS THAN OR EQUAL TO 5
         filter_func5 = filter_tools.FilterFunction(lambda val: val <= 5)
@@ -56,6 +56,7 @@ class FilterFunctionTests(TestCase):
         self.assertTrue(combo_func(12))
 
 
+# noinspection SpellCheckingInspection
 class LogFilterTests(TestCase):
 
     # The "==", ">=", "<=", ">", and "<" should return functions that
@@ -173,6 +174,36 @@ class LogFilterTests(TestCase):
         self.assertTrue(filter_function(larger_object))
         self.assertTrue(filter_function(equal_object))
         self.assertFalse(filter_function(smaller_object))
+
+    def test_modulo_search_operator(self):
+        """Tests that LogFilter instances return a function that will perform a
+        regex search on any provided objects such that object.attr has at least
+        one matching pattern"""
+        contains_filter = filter_tools.LogFilter('attr')
+
+        # tests that "word" is present at all
+        not_in_object_0 = MagicMock(attr='test')
+        in_object_0 = MagicMock(attr='test_word_test')
+        pattern_0 = r'word'
+        # tests that "word" is the first word
+        not_in_object_1 = MagicMock(attr='_word_test')
+        in_object_1 = MagicMock(attr='word_test')
+        pattern_1 = r'^word'
+        # tests that "word" with more than one "o" is present
+        not_in_object_2 = MagicMock(attr='word_test')
+        in_object_2 = MagicMock(attr='woooord_test')
+        pattern_2 = r'wo{2,}rd'
+
+        filter_function_0 = contains_filter % pattern_0
+        filter_function_1 = contains_filter % pattern_1
+        filter_function_2 = contains_filter % pattern_2
+
+        self.assertTrue(filter_function_0(in_object_0))
+        self.assertFalse(filter_function_0(not_in_object_0))
+        self.assertTrue(filter_function_1(in_object_1))
+        self.assertFalse(filter_function_1(not_in_object_1))
+        self.assertTrue(filter_function_2(in_object_2))
+        self.assertFalse(filter_function_2(not_in_object_2))
 
     def test_combine_filters_with_ampersand(self):
         """Tests that a log filter's return functions can be combined with an
