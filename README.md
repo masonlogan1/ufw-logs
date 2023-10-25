@@ -17,7 +17,7 @@ ufw
 - [x] ability to chain searches together using `&`, `^`, and `|` operators
 - [x] ability to search using `%` and `!%` operators for similarity/dissimilarity
 attribute is not in a collection
-- [ ] ability to use `+` and `-` operators in filtering
+- [x] ability to use `+` and `-` operators in filtering
 
 ### Version 0.2
 Database persistence, improved file handling

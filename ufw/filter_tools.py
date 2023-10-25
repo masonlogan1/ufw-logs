@@ -42,6 +42,15 @@ class FilterFunction(Callable):
     def __or__(self, func: Callable):
         return FilterFunction(lambda value: self.func(value) or func(value))
 
+    def __add__(self, func: Callable):
+        """Logically adds the results of this function with the provided one"""
+        return FilterFunction(lambda value: self.func(value) or func(value))
+
+    def __sub__(self, func: Callable):
+        """Removes elements from this function's return set that are in the
+        other function's return set"""
+        return FilterFunction(lambda value: self.func(value) and not func(value))
+
 
 class LogFilter:
     def __init__(self, attr):

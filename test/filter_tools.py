@@ -239,6 +239,48 @@ class LogFilterTests(TestCase):
         self.assertFalse(filter_function(equal_object))
         self.assertTrue(filter_function(smaller_object))
 
+    def test_subtract_filters(self):
+        """Tests that log filters can be subtracted from one another to produce
+        a set of results containing members of the first filter's return set
+        that are not found in the second filter's return set"""
+        filter0 = filter_tools.LogFilter('attr0')
+        filter1 = filter_tools.LogFilter('attr1')
+
+        # attr0 should be == 10
+        # attr1 should be == 15
+        in_set_0 = MagicMock(attr0=10, attr1=20)
+        in_set_0_and_1 = MagicMock(attr0=10, attr1=15)
+        in_set_1 = MagicMock(attr0=5, attr1=15)
+        out_of_both_sets = MagicMock(attr0=5, attr1=20)
+
+        filter_function = (filter0 == 10) - (filter1 == 15)
+
+        self.assertTrue(filter_function(in_set_0))
+        self.assertFalse(filter_function(in_set_0_and_1))
+        self.assertFalse(filter_function(in_set_1))
+        self.assertFalse(filter_function(out_of_both_sets))
+
+    def test_addition_filters(self):
+        """Tests that log filters can be added to one another to produce
+        a set of results containing members of the first filter's return set
+        and members of the second filter's return set"""
+        filter0 = filter_tools.LogFilter('attr0')
+        filter1 = filter_tools.LogFilter('attr1')
+
+        # attr0 should be == 10
+        # attr1 should be == 15
+        in_set_0 = MagicMock(attr0=10, attr1=20)
+        in_set_0_and_1 = MagicMock(attr0=10, attr1=15)
+        in_set_1 = MagicMock(attr0=5, attr1=15)
+        out_of_both_sets = MagicMock(attr0=5, attr1=20)
+
+        filter_function = (filter0 == 10) + (filter1 == 15)
+
+        self.assertTrue(filter_function(in_set_0))
+        self.assertTrue(filter_function(in_set_0_and_1))
+        self.assertTrue(filter_function(in_set_1))
+        self.assertFalse(filter_function(out_of_both_sets))
+
 
 class PresetFiltersTests(TestCase):
     def test_all_filters_are_correct_type(self):

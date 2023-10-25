@@ -120,7 +120,7 @@ class UFWLogFile:
                 datetime.fromtimestamp(os.path.getctime(filename)).year
             )
 
-    def search(self, search_fns: iter = ()):
+    def search(self, search_fns: Iterable = ()):
         return [event for event in self.log_events
                 if all(fn(event) for fn in search_fns)]
 
